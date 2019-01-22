@@ -130,7 +130,7 @@ func priToCheckKey(priKey *Privacy) string {
 
 func main() {
 	clog.SetFileLog(&types.Log{
-		Loglevel:        "info",
+		Loglevel:        "debug",
 		LogConsoleLevel: "info",
 		LogFile:         "logs/log.log",
 		MaxFileSize:     400,
