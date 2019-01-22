@@ -6,8 +6,6 @@ csv = "test.csv"
 checkTimeout = 30
 #发送地址
 fromAddr = "12qyocayNF7Lv6C9qW4avxs2E7U41fKSfv"
-#发送地址私钥
-fromPri = "4257D8692EF7FE13C68B65D6A52F03933DB2FA5CE8FAF210B5B8B80C721CED01"
 #每笔交易发送间隔时间，单位ms
 interval = 100
 #CSV标题头行数

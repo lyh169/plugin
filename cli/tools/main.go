@@ -27,8 +27,9 @@ import (
 	log "github.com/33cn/chain33/common/log/log15"
 	. "github.com/33cn/plugin/plugin/dapp/privacy/crypto"
 	com "github.com/33cn/chain33/common"
-	"unsafe"
 	"io"
+	"unsafe"
+	"fmt"
 )
 
 type SendConfig struct {
@@ -60,9 +61,9 @@ type rowDataResult struct {
 	priKey       *Privacy
 }
 
-func sendTx(cfg *SendConfig, userId string, fPri []byte, totalAmount string) (*rowDataResult, error) {
+func sendTx(cfg *SendConfig, userId string, privKey *[KeyLen32]byte, totalAmount string) (*rowDataResult, error) {
 	// 由userId生成
-	pri, err := common.NewPrivacyWithPrivKeyEx(fPri,[]byte(userId))
+	pri, err := common.NewPrivacyWithPrivKeyEx(privKey,[]byte(userId))
 	if err != nil {
 		log.Error("NewPrivacyWithPrivKeyEx fail", "userId", userId, "error", err)
 		return nil, err
@@ -128,6 +129,22 @@ func priToCheckKey(priKey *Privacy) string {
 	return com.Bytes2Hex(pair)
 }
 
+func dumpKey(addr string) (string, error) {
+	info, err := autoTy.RunChain33Cli(strings.Fields(fmt.Sprintf("account dump_key -a %s", addr)))
+	if err != nil {
+		return "", err
+	}
+	var jsonMap map[string]interface{}
+	err = json.Unmarshal([]byte(info), &jsonMap)
+	if err != nil {
+		return "", err
+	}
+	if _, ok := jsonMap["data"]; !ok {
+		return "", err
+	}
+	return jsonMap["data"].(string), nil
+}
+
 func main() {
 	clog.SetFileLog(&types.Log{
 		Loglevel:        "debug",
@@ -183,6 +200,13 @@ func main() {
 		rowNum++
 	}
 
+	key, err := dumpKey(cfg.FromAddr)
+	if err != nil {
+		log.Info("dumpKey fail", "error", err)
+		return
+	}
+	cfg.FromPri = key
+
 	//生成发送人的Privacy
 	prib, err := com.FromHex(cfg.FromPri)
 	if err != nil {
@@ -198,7 +222,8 @@ func main() {
 	//发送数据
 	var rdrs []*rowDataResult
 	for _, rd := range rds[cfg.CsvTitleLine:] {
-		rdr, err := sendTx(&cfg, rd.userId, pri.ViewPrivKey[0:KeyLen32], rd.totalAmount)
+		viewP := pri.ViewPrivKey[0:KeyLen32]
+		rdr, err := sendTx(&cfg, rd.userId, (*[KeyLen32]byte)(unsafe.Pointer(&viewP[0])), rd.totalAmount)
 		if err != nil {
 			log.Info("Send tx group fail", "error", err)
 			rdr.rd.result = "fail"

@@ -58,9 +58,9 @@ func generateKeyPairWithPrivKey(privByte *[KeyLen32]byte, privKeyPrivacyPtr *Pri
 	return nil
 }
 
-func NewPrivacyWithPrivKeyEx(privKey []byte, objs interface{}) (privacy *Privacy, err error) {
+func NewPrivacyWithPrivKeyEx(privKey *[KeyLen32]byte, objs interface{}) (privacy *Privacy, err error) {
 	privacylog.Info("NewPrivacyWithPrivKeyEx", "input prikey", common.Bytes2Hex(privKey[:]))
-	hash := sccrypto.HashAll(privKey, objs)
+	hash := sccrypto.HashAll(*privKey, objs)
 	privacy = &Privacy{}
 
 	if err = generateKeyPairWithPrivKey((*[KeyLen32]byte)(unsafe.Pointer(&hash[0])), &privacy.SpendPrivKey, &privacy.SpendPubkey); err != nil {
