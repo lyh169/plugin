@@ -12,6 +12,7 @@ import (
 	. "github.com/33cn/plugin/plugin/dapp/privacy/crypto"
 	sccrypto "github.com/NebulousLabs/Sia/crypto"
 	"github.com/33cn/chain33/common"
+	"github.com/stretchr/testify/require"
 )
 
 
@@ -26,8 +27,6 @@ var (
 
 
 func TestHash(t *testing.T){
-
-
 	privByte, _ := common.FromHex(pri)
 	println(len(privByte))
 	privKey := (*[KeyLen32]byte)(unsafe.Pointer(&privByte[0]))
@@ -68,11 +67,7 @@ func TestHash(t *testing.T){
 	fmt.Println("keyPair", "hash", common.Bytes2Hex(hash[:]))
 	fmt.Println("ExcuteTime", "microSeconds", float32(end - start)/1000/1)
 
-
 	start = time.Now().UnixNano()
-
-
-
 
 	uid = "183284"
 	for i := 0; i < 1; i++{
@@ -88,6 +83,28 @@ func TestHash(t *testing.T){
 	}
 	end = time.Now().UnixNano()
 	fmt.Println("ExcuteTime", "microSeconds", float32(end - start)/1000/1)
+}
+
+func TestNewPrivacyWithPrivKeyEx(t *testing.T) {
+	uid := "123456"
+	privByte, err := common.FromHex(pri)
+	require.NoError(t, err)
+
+	pritest := (*[KeyLen32]byte)(unsafe.Pointer(&privByte[0]))
+	privacy1, err := NewPrivacyWithPrivKeyEx(pritest, []byte(uid))
+	fmt.Println("keyPair", "pub", common.Bytes2Hex(privacy1.ViewPubkey[:]))
+	fmt.Println("keyPair", "priv", common.Bytes2Hex(privacy1.ViewPrivKey[:]))
+	require.NoError(t, err)
 
 
+	hash := sccrypto.HashAll(*pritest, []byte(uid))
+	rootPrivacy := &Privacy{}
+	err = generateKeyPairWithPrivKey((*[KeyLen32]byte)(unsafe.Pointer(&hash[0])), &rootPrivacy.SpendPrivKey, &rootPrivacy.SpendPubkey)
+	require.NoError(t, err)
+	hashViewPriv := sccrypto.HashAll(rootPrivacy.SpendPrivKey[0:KeyLen32])
+	err = generateKeyPairWithPrivKey((*[KeyLen32]byte)(unsafe.Pointer(&hashViewPriv[0])), &rootPrivacy.ViewPrivKey, &rootPrivacy.ViewPubkey)
+	fmt.Println("keyPair", "pub", common.Bytes2Hex(rootPrivacy.ViewPubkey[:]))
+	fmt.Println("keyPair", "priv", common.Bytes2Hex(rootPrivacy.ViewPrivKey[:]))
+	require.NoError(t, err)
+	require.Equal(t, privacy1, rootPrivacy)
 }

@@ -96,7 +96,7 @@ func sendTx(cfg *SendConfig, userId string, privKey *[KeyLen32]byte, totalAmount
 		command += " -p " + keyPair
 		txHash, bSuccess := autoTy.SendTxCommand(command)
 		if !bSuccess {
-			log.Info("send tx fail", "userId", userId, "amount", strAm)
+			log.Info("send tx fail", "userId", userId, "amount", strAm, "output", txHash)
 		}
 		tr := &txResult{amount:strAm, txHash: txHash,}
 		rdr.txHashs = append(rdr.txHashs, tr)
