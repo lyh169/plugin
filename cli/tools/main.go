@@ -40,6 +40,7 @@ type SendConfig struct {
 	FromPri         string         `tom:"fromPri"`
 	Interval        int            `toml:"interval"`
 	CsvTitleLine    int            `toml:"csvTitleLine"`
+	SendUnit        int64          `toml:"sendUnit"`
 }
 
 
@@ -86,7 +87,7 @@ func sendTx(cfg *SendConfig, userId string, privKey *[KeyLen32]byte, totalAmount
 	pair = append(pair, pri.SpendPubkey[:]...)
 	keyPair := com.Bytes2Hex(pair)
 	amount *= common.Coin
-	amounts := common.DecomposeAmount2digits(amount, common.Coin)
+	amounts := common.DivisionAmount(amount)
 	for _, a := range amounts {
 		fa := float64(a/common.Coin)
 		strAm := strconv.FormatFloat(fa, 'f', 6, 64)
@@ -96,8 +97,22 @@ func sendTx(cfg *SendConfig, userId string, privKey *[KeyLen32]byte, totalAmount
 		command += " -p " + keyPair
 		txHash, bSuccess := autoTy.SendTxCommand(command)
 		if !bSuccess {
-			log.Info("send tx fail", "userId", userId, "amount", strAm, "output", txHash)
+			log.Error("send tx fail, start resend tx", "userId", userId, "amount", strAm, "output", txHash)
+			stat := time.Now()
+			for {
+				if txHash, bSuccess = autoTy.SendTxCommand(command); !bSuccess {
+					log.Error("sendError", "output", txHash)
+					if time.Now().Sub(stat) > time.Minute * 10 {
+						log.Error("sendError, it is timeout 10 Minute")
+						break
+					}
+					time.Sleep(time.Second * 5)
+					continue
+				}
+				break
+			}
 		}
+		log.Debug("send tx", "userId", userId, "amount", strAm, "result", bSuccess, "output", txHash)
 		tr := &txResult{amount:strAm, txHash: txHash,}
 		rdr.txHashs = append(rdr.txHashs, tr)
 		time.Sleep(time.Millisecond * time.Duration(cfg.Interval))
@@ -200,6 +215,7 @@ func main() {
 		rowNum++
 	}
 
+	common.StartCheck(cfg.CsvPath, rowNum - cfg.CsvTitleLine)
 	key, err := dumpKey(cfg.FromAddr)
 	if err != nil {
 		log.Info("dumpKey fail", "error", err)
@@ -223,9 +239,10 @@ func main() {
 	var rdrs []*rowDataResult
 	for _, rd := range rds[cfg.CsvTitleLine:] {
 		viewP := pri.ViewPrivKey[0:KeyLen32]
+		log.Info("SendStockToUser", "uid", rd.userId, "SendAmount", rd.totalAmount)
 		rdr, err := sendTx(&cfg, rd.userId, (*[KeyLen32]byte)(unsafe.Pointer(&viewP[0])), rd.totalAmount)
 		if err != nil {
-			log.Info("Send tx group fail", "error", err)
+			log.Error("Send tx group fail", "error", err)
 			rdr.rd.result = "fail"
 		}
 		rdrs = append(rdrs, rdr)
@@ -265,19 +282,21 @@ func main() {
 	w := csv.NewWriter(file)
 	//写表头
 	for _, r := range rds[:cfg.CsvTitleLine] {
-		w.Write([]string{r.userId, r.totalAmount, r.result, "a+B"})
+		w.Write([]string{r.userId, r.totalAmount, r.result, "checkingKey"})
 		w.Flush()
 	}
 	for _, r := range rdrs {
 		keyPair := priToCheckKey(r.priKey)
 		w.Write([]string{r.rd.userId, r.rd.totalAmount, r.rd.result, keyPair})
 		w.Flush()
+		amount, _ := strconv.ParseInt(r.rd.totalAmount, 10, 64)
+		common.SendToCheck(r.rd.userId, keyPair, amount)
 	}
 	file.Close()
 
 	//保存失败的发送结果
 	if !isAllSucc {
-		log.Info("send some tx fail!")
+		log.Error("send some tx fail!")
 		path := cfg.CsvPath[:len(cfg.CsvPath)-len(".csv")] + "_resend" + ".csv"
 		file, _ := os.OpenFile(path, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, os.ModePerm)
 		w := csv.NewWriter(file)
@@ -302,4 +321,6 @@ func main() {
 		log.Info("send all tx success!")
 		os.RemoveAll(cfg.CsvPath[:len(cfg.CsvPath)-len(".csv")] + "_resend" + ".csv")
 	}
+
+	common.WaitCheck()
 }

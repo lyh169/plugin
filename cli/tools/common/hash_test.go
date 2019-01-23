@@ -108,3 +108,50 @@ func TestNewPrivacyWithPrivKeyEx(t *testing.T) {
 	require.NoError(t, err)
 	require.Equal(t, privacy1, rootPrivacy)
 }
+
+func TestDivisionAmount(t *testing.T) {
+	amount := Coin * 99
+	amounts := DivisionAmount(amount)
+	require.Equal(t, len(amounts), 1)
+	require.Equal(t, amount, amounts[0])
+
+	amount = Coin * 100
+	amounts = DivisionAmount(amount)
+	require.Equal(t, len(amounts), 1)
+	require.Equal(t, amount, amounts[0])
+
+	amount = Coin * 101
+	amounts = DivisionAmount(amount)
+	require.Equal(t, len(amounts), 2)
+	require.Equal(t, 100 * Coin, amounts[0])
+	require.Equal(t, 1 * Coin, amounts[1])
+
+	amount = Coin * 1000
+	amounts = DivisionAmount(amount)
+	require.Equal(t, len(amounts), 1)
+	require.Equal(t, 1000 * Coin, amounts[0])
+
+	amount = Coin * 1001
+	amounts = DivisionAmount(amount)
+	require.Equal(t, len(amounts), 2)
+	require.Equal(t, 1000 * Coin, amounts[0])
+	require.Equal(t, 1 * Coin, amounts[1])
+
+	amount = Coin * 999
+	amounts = DivisionAmount(amount)
+	require.Equal(t, len(amounts), 10)
+	require.Equal(t, 100 * Coin, amounts[0])
+	require.Equal(t, 100 * Coin, amounts[6])
+	require.Equal(t, 99 * Coin, amounts[len(amounts) - 1])
+
+	amount = Coin * 100111
+	amounts = DivisionAmount(amount)
+	require.Equal(t, len(amounts), 102)
+	require.Equal(t, 1000 * Coin, amounts[0])
+	require.Equal(t, 1000 * Coin, amounts[6])
+	require.Equal(t, 1000 * Coin, amounts[50])
+	require.Equal(t, 1000 * Coin, amounts[99])
+	require.Equal(t, 100 * Coin, amounts[len(amounts) - 2])
+	require.Equal(t, 11 * Coin, amounts[len(amounts) - 1])
+
+}
