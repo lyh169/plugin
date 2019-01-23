@@ -90,9 +90,9 @@ func sendTx(cfg *SendConfig, userId string, privKey *[KeyLen32]byte, totalAmount
 	for _, a := range amounts {
 		fa := float64(a/common.Coin)
 		strAm := strconv.FormatFloat(fa, 'f', 6, 64)
-		command := "privacy pub2priv "
+		command := "send privacy pub2priv "
 		command += " -a " + strAm
-		command += " -f " + cfg.FromAddr
+		command += " -k " + cfg.FromAddr
 		command += " -p " + keyPair
 		txHash, bSuccess := autoTy.SendTxCommand(command)
 		if !bSuccess {
