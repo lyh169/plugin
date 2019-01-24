@@ -7,6 +7,8 @@ checkTimeout = 30
 #发送地址
 fromAddr = "12qyocayNF7Lv6C9qW4avxs2E7U41fKSfv"
 #每笔交易发送间隔时间，单位ms
-interval = 100
+interval = 10
 #CSV标题头行数
 csvTitleLine = 1
+#发送交易失败，最大重发时间,单位minute
+reSendTimeout = 10

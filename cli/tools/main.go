@@ -40,7 +40,7 @@ type SendConfig struct {
 	FromPri         string         `tom:"fromPri"`
 	Interval        int            `toml:"interval"`
 	CsvTitleLine    int            `toml:"csvTitleLine"`
-	SendUnit        int64          `toml:"sendUnit"`
+	ReSendTimeout   int            `toml:"reSendTimeout"`
 }
 
 
@@ -88,6 +88,7 @@ func sendTx(cfg *SendConfig, userId string, privKey *[KeyLen32]byte, totalAmount
 	keyPair := com.Bytes2Hex(pair)
 	amount *= common.Coin
 	amounts := common.DivisionAmount(amount)
+	count := 0
 	for _, a := range amounts {
 		fa := float64(a/common.Coin)
 		strAm := strconv.FormatFloat(fa, 'f', 6, 64)
@@ -97,12 +98,12 @@ func sendTx(cfg *SendConfig, userId string, privKey *[KeyLen32]byte, totalAmount
 		command += " -p " + keyPair
 		txHash, bSuccess := autoTy.SendTxCommand(command)
 		if !bSuccess {
-			log.Error("send tx fail, start resend tx", "userId", userId, "amount", strAm, "output", txHash)
+			log.Error("send tx fail, start resend tx", "userId", userId, "amount", strAm, "count", count, "output", txHash)
 			stat := time.Now()
 			for {
 				if txHash, bSuccess = autoTy.SendTxCommand(command); !bSuccess {
 					log.Error("sendError", "output", txHash)
-					if time.Now().Sub(stat) > time.Minute * 10 {
+					if time.Now().Sub(stat) > time.Minute * time.Duration(cfg.ReSendTimeout) {
 						log.Error("sendError, it is timeout 10 Minute")
 						break
 					}
@@ -112,7 +113,8 @@ func sendTx(cfg *SendConfig, userId string, privKey *[KeyLen32]byte, totalAmount
 				break
 			}
 		}
-		log.Debug("send tx", "userId", userId, "amount", strAm, "result", bSuccess, "output", txHash)
+		log.Debug("send tx", "userId", userId, "amount", strAm, "result", bSuccess, "count", count, "output", txHash)
+		count++
 		tr := &txResult{amount:strAm, txHash: txHash,}
 		rdr.txHashs = append(rdr.txHashs, tr)
 		time.Sleep(time.Millisecond * time.Duration(cfg.Interval))
@@ -259,16 +261,18 @@ func main() {
 		for i := 0; i < len(rdrs); i++ {
 			rdrs[i].rd.result = "success"
 			for j := 0; j < len(rdrs[i].txHashs); j++ {
-				ok := checkTx(rdrs[i].txHashs[j].txHash)
-				if !ok {
-					rdrs[i].txHashs[j].result = false
-					rdrs[i].rd.result = "fail"
-					isAllSucc = false
-				} else {
-					rdrs[i].txHashs[j].result = true
+				if !rdrs[i].txHashs[j].result {
+					ok := checkTx(rdrs[i].txHashs[j].txHash)
+					if !ok {
+						rdrs[i].txHashs[j].result = false
+						rdrs[i].rd.result = "fail"
+						isAllSucc = false
+					} else {
+						rdrs[i].txHashs[j].result = true
+					}
+					log.Debug("tx query", "userId", rdrs[i].rd.userId, "amount", rdrs[i].txHashs[j].amount,
+						"tx hash", rdrs[i].txHashs[j].txHash, "result", rdrs[i].txHashs[j].result)
 				}
-				log.Debug("tx query", "userId", rdrs[i].rd.userId, "amount", rdrs[i].txHashs[j].amount,
-					"tx hash", rdrs[i].txHashs[j].txHash, "result", rdrs[i].txHashs[j].result)
 			}
 		}
 		if isAllSucc {
