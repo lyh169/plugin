@@ -216,8 +216,6 @@ func main() {
 		rds = append(rds, rd)
 		rowNum++
 	}
-
-	common.StartCheck(cfg.CsvPath, rowNum - cfg.CsvTitleLine)
 	key, err := dumpKey(cfg.FromAddr)
 	if err != nil {
 		log.Info("dumpKey fail", "error", err)
@@ -293,8 +291,6 @@ func main() {
 		keyPair := priToCheckKey(r.priKey)
 		w.Write([]string{r.rd.userId, r.rd.totalAmount, r.rd.result, keyPair})
 		w.Flush()
-		amount, _ := strconv.ParseInt(r.rd.totalAmount, 10, 64)
-		common.SendToCheck(r.rd.userId, keyPair, amount)
 	}
 	file.Close()
 
@@ -325,6 +321,4 @@ func main() {
 		log.Info("send all tx success!")
 		os.RemoveAll(cfg.CsvPath[:len(cfg.CsvPath)-len(".csv")] + "_resend" + ".csv")
 	}
-
-	common.WaitCheck()
 }
