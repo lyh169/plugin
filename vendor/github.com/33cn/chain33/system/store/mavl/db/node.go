@@ -501,7 +501,7 @@ func removeOrphan(t *Tree, node *Node) {
 		return
 	}
 	if enableMemTree && t != nil {
-		t.obsoleteNode[Hash64(node.hash)] = struct{}{}
+		t.obsoleteNode[uintkey(Hash64(node.hash))] = struct{}{}
 	}
 	t.ndb.RemoveNode(t, node)
 }

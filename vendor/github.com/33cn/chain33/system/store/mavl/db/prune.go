@@ -571,4 +571,5 @@ func PrintMemStats(height int64) {
 	var m runtime.MemStats
 	runtime.ReadMemStats(&m)
 	treelog.Info("printMemStats:", "程序向系统申请", m.HeapSys/(1024*1024), "堆上目前分配Alloc:", m.HeapAlloc/(1024*1024), "堆上没有使用", m.HeapIdle/(1024*1024), "HeapReleased", m.HeapReleased/(1024*1024), "height", height)
+	fmt.Println("程序向系统申请", m.HeapSys/(1024*1024), "堆上目前分配Alloc:", m.HeapAlloc/(1024*1024), "堆上没有使用", m.HeapIdle/(1024*1024),)
 }

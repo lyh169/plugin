@@ -23,6 +23,6 @@ func main() {
 	go func() {
 		http.ListenAndServe("0.0.0.0:8080", nil)
 	}()
-	debug.SetGCPercent(20)
+	debug.SetGCPercent(10)
 	cli.RunChain33("")
 }

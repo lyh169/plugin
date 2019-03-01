@@ -33,7 +33,6 @@ func NewTreeMap(size int) *TreeMap {
 
 func (tm *TreeMap) Add(key, value interface{}) {
 	if _, ok := tm.mpCache[key]; ok {
-		panic(fmt.Sprintln("*********for test map*******", key))
 		delete(tm.mpCache, key)
 		return
 	}
@@ -76,7 +75,6 @@ func NewTreeARC(size int) *TreeARC {
 
 func (ta *TreeARC) Add(key, value interface{}) {
 	if ta.arcCache.Contains(key) {
-		panic(fmt.Sprintln("*********for test TreeARC*******", key))
 		ta.arcCache.Remove(key)
 		return
 	}

@@ -1997,16 +1997,49 @@ func TestSize1(t *testing.T) {
 		Height    int32
 		Size      int32
 	}
-	a := types.StoreNode{}
+	a := types.StoreNode{
+	}
 	b := storeNode{}
 	var c []byte
 	d := storeNode1{}
 
+	arcmp := NewTreeMap(350*10000)
+	if arcmp == nil {
+		return
+	}
 
-	d.Key = make([][]byte, 4)
-	d.Key[0] = []byte("11111111111111111111111111111")
-	d.Key[1] = []byte("22222222222222222222222222222")
-	d.Key[2] = []byte("33333333333333333333333333333")
+	//for i := 0; i < 300*10000; i++ {
+	//	data := &storeNode{
+	//		Key: []byte("12345678901234567890123456789012"),
+	//		Value: []byte("12345678901234567890123456789012"),
+	//		LeftHash: []byte("12345678901234567890123456789012"),
+	//		RightHash: []byte("12345678901234567890123456789012"),
+	//		//Key: copyBytes([]byte("12345678901234567890123456789012")),
+	//		//Value: copyBytes([]byte("12345678901234567890123456789012")),
+	//		//LeftHash: copyBytes([]byte("12345678901234567890123456789012")),
+	//		//RightHash: copyBytes([]byte("12345678901234567890123456789012")),
+	//		Height: 123,
+	//		Size: 123,
+	//	}
+	//	arcmp.Add(int64(i), data)
+	//}
+
+	//for i := 0; i < 100*10000; i++ {
+	//	data := &storeNode1{}
+	//	data.Height = 123
+	//	data.Size = 123
+	//	d.Key = make([][]byte, 4)
+	//	//d.Key[0] = []byte("12345678901234567890123456789012")
+	//	//d.Key[1] = []byte("12345678901234567890123456789012")
+	//	//d.Key[2] = []byte("12345678901234567890123456789012")
+	//	//d.Key[3] = []byte("12345678901234567890123456789012")
+	//
+	//	d.Key[0] = copyBytes([]byte("12345678901234567890123456789012"))
+	//	d.Key[1] = copyBytes([]byte("12345678901234567890123456789012"))
+	//	d.Key[2] = copyBytes([]byte("12345678901234567890123456789012"))
+	//	d.Key[3] = copyBytes([]byte("12345678901234567890123456789012"))
+	//	arcmp.Add(int64(i), data)
+	//}
 
 	PrintMemStats(1)
 	fmt.Println(unsafe.Sizeof(a), unsafe.Sizeof(b), unsafe.Sizeof(c), unsafe.Sizeof(d), len(d.Key), cap(d.Key))

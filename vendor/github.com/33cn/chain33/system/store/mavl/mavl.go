@@ -38,6 +38,7 @@ type Store struct {
 	enableMavlPrune  bool
 	pruneHeight      int32
 	enableMemTree    bool
+	enableMemVal     bool
 }
 
 func init() {
@@ -50,6 +51,7 @@ type subConfig struct {
 	EnableMavlPrune  bool  `json:"enableMavlPrune"`
 	PruneHeight      int32 `json:"pruneHeight"`
 	EnableMemTree    bool  `json:"enableMemTree"`
+	EnableMemVal     bool  `json:"enableMemVal"`
 }
 
 // New new mavl store module
@@ -60,17 +62,19 @@ func New(cfg *types.Store, sub []byte) queue.Module {
 		types.MustDecode(sub, &subcfg)
 	}
 	mavls := &Store{bs, &sync.Map{}, subcfg.EnableMavlPrefix, subcfg.EnableMVCC,
-	subcfg.EnableMavlPrune, subcfg.PruneHeight, subcfg.EnableMemTree}
+	subcfg.EnableMavlPrune, subcfg.PruneHeight, subcfg.EnableMemTree, subcfg.EnableMemVal}
 	mavls.enableMavlPrefix = subcfg.EnableMavlPrefix
 	mavls.enableMVCC = subcfg.EnableMVCC
 	mavls.enableMavlPrune = subcfg.EnableMavlPrune
 	mavls.pruneHeight = subcfg.PruneHeight
 	mavls.enableMemTree = subcfg.EnableMemTree
+	mavls.enableMemVal = subcfg.EnableMemVal
 	mavl.EnableMavlPrefix(mavls.enableMavlPrefix)
 	mavl.EnableMVCC(mavls.enableMVCC)
 	mavl.EnablePrune(mavls.enableMavlPrune)
 	mavl.SetPruneHeight(int(mavls.pruneHeight))
 	mavl.EnableMemTree(mavls.enableMemTree)
+	mavl.EnableMemVal(mavls.enableMemVal)
 	bs.SetChild(mavls)
 	return mavls
 }
