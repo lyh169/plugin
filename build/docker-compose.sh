@@ -115,6 +115,8 @@ function start() {
 
     docker-compose ps
 
+    #docker-compose logs -f
+
     # query node run status
     check_docker_status
     ${CLI} block last_header

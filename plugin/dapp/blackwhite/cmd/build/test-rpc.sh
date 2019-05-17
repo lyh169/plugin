@@ -21,9 +21,9 @@ gID=""
 gResp=""
 
 glAddr=""
-gameAddr1=""
-gameAddr2=""
-gameAddr3=""
+gameAddr1="1E5saiXVb9mW8wcWUUZjsHJPZs5GmdzuSY"
+gameAddr2="14KEKbYtKKQm4wMthSK9J4La4nAiidGozt"
+gameAddr3="12qyocayNF7Lv6C9qW4avxs2E7U41fKSfv"
 
 chain33_NewAccount() {
     label=$1
@@ -186,26 +186,26 @@ function run_testcases() {
     #white2="OiexKDzIlS1CKr3KBNWEY1k5uXzDI/ou6Dd+x0ByQCM="
 
     #先创建账户地址
-    chain33_NewAccount "label188"
-    gameAddr1="${glAddr}"
-    chain33_NewAccount "label288"
-    gameAddr2="${glAddr}"
-    chain33_NewAccount "label388"
-    gameAddr3="${glAddr}"
+#    chain33_NewAccount "label188"
+#    gameAddr1="${glAddr}"
+#    chain33_NewAccount "label288"
+#    gameAddr2="${glAddr}"
+#    chain33_NewAccount "label388"
+#    gameAddr3="${glAddr}"
 
     #给每个账户分别转帐
-    origAddr="12qyocayNF7Lv6C9qW4avxs2E7U41fKSfv"
-    chain33_SendToAddress "${origAddr}" "${gameAddr1}" 1000000000
-    chain33_SendToAddress "${origAddr}" "${gameAddr2}" 1000000000
-    chain33_SendToAddress "${origAddr}" "${gameAddr3}" 1000000000
-
-    block_wait 1
-
-    #给游戏合约中转帐
-    bwExecAddr="146wei89zoX5TNQKATBJmduNPEtSKTXi1z"
-    chain33_SendToAddress "${gameAddr1}" "${bwExecAddr}" 500000000
-    chain33_SendToAddress "${gameAddr2}" "${bwExecAddr}" 500000000
-    chain33_SendToAddress "${gameAddr3}" "${bwExecAddr}" 500000000
+#    origAddr="12qyocayNF7Lv6C9qW4avxs2E7U41fKSfv"
+#    chain33_SendToAddress "${origAddr}" "${gameAddr1}" 1000000000
+#    chain33_SendToAddress "${origAddr}" "${gameAddr2}" 1000000000
+#    chain33_SendToAddress "${origAddr}" "${gameAddr3}" 1000000000
+#
+#    block_wait 1
+#
+#    #给游戏合约中转帐
+#    bwExecAddr="146wei89zoX5TNQKATBJmduNPEtSKTXi1z"
+#    chain33_SendToAddress "${gameAddr1}" "${bwExecAddr}" 500000000
+#    chain33_SendToAddress "${gameAddr2}" "${bwExecAddr}" 500000000
+#    chain33_SendToAddress "${gameAddr3}" "${bwExecAddr}" 500000000
 
     block_wait 1
     blackwhite_BlackwhiteCreateTx "${gameAddr1}"
@@ -242,3 +242,8 @@ function main() {
 }
 
 main "$1"
+
+#MAIN_HTTP="http://172.19.0.4:8901"
+#gameAddr1="12qyocayNF7Lv6C9qW4avxs2E7U41fKSfv"
+#blackwhite_BlackwhiteCreateTx "${gameAddr1}"
+
