@@ -78,8 +78,10 @@ function base_init() {
     sed -i $sedfix 's/^Title.*/Title="local"/g' chain33.toml
     sed -i $sedfix 's/^TestNet=.*/TestNet=true/g' chain33.toml
 
+    sed -i $sedfix 's/^maxTxNumPerAccount=.*/maxTxNumPerAccount=10000/g' chain33.toml
+    sed -i $sedfix 's/^minTxFeeRate=.*/minTxFeeRate=1000/g' chain33.toml
     sed -i $sedfix 's/^powLimitBits=.*/powLimitBits="0x1f2fffff"/g' chain33.toml
-    sed -i $sedfix 's/^targetTimePerBlock=.*/targetTimePerBlock=1/g' chain33.toml
+    sed -i $sedfix 's/^targetTimePerBlock=.*/targetTimePerBlock=5/g' chain33.toml
     sed -i $sedfix 's/^targetTimespan=.*/targetTimespan=10000000/g' chain33.toml
     sed -i $sedfix 's/^isLevelFee=.*/isLevelFee=false/g' chain33.toml
 
@@ -477,29 +479,29 @@ function main() {
     echo "==============================DAPP=$DAPP main begin========================================================"
     ### init para ####
     base_init
-    dapp_run init
+#    dapp_run init
 
     ### start docker ####
     start
 
     ### config env ###
-    base_config
-    dapp_run config
-
-    ### test cases ###
-    ip=$(${CLI} net info | jq -r ".externalAddr")
-    ip=$(echo "$ip" | cut -d':' -f 1)
-    if [ "$ip" == "127.0.0.1" ]; then
-        ip=$(${CLI} net info | jq -r ".localAddr")
-        ip=$(echo "$ip" | cut -d':' -f 1)
-    fi
-    dapp_run test "${ip}"
-
-    ### rpc test  ###
-    rpc_test "${ip}"
-
-    ### finish ###
-    check_docker_container
+#    base_config
+#    dapp_run config
+#
+#    ### test cases ###
+#    ip=$(${CLI} net info | jq -r ".externalAddr")
+#    ip=$(echo "$ip" | cut -d':' -f 1)
+#    if [ "$ip" == "127.0.0.1" ]; then
+#        ip=$(${CLI} net info | jq -r ".localAddr")
+#        ip=$(echo "$ip" | cut -d':' -f 1)
+#    fi
+#    dapp_run test "${ip}"
+#
+#    ### rpc test  ###
+#    rpc_test "${ip}"
+#
+#    ### finish ###
+#    check_docker_container
     echo "===============================DAPP=$DAPP main end========================================================="
 }
 
