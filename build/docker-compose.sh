@@ -183,6 +183,8 @@ function start() {
 
     sync_status "${CLI}"
 
+    ${CLI} send coins transfer -a 100 -n test -t 14KEKbYtKKQm4wMthSK9J4La4nAiidGozt -k 4257D8692EF7FE13C68B65D6A52F03933DB2FA5CE8FAF210B5B8B80C721CED01
+
     ${CLI} wallet status
     ${CLI} account list
     ${CLI} mempool list

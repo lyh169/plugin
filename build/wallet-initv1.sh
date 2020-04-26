@@ -1,5 +1,24 @@
 #!/usr/bin/env bash
 
+function block_wait() {
+    if [ "$#" -lt 2 ]; then
+        echo "wrong block_wait params"
+        exit 1
+    fi
+    cur_height=$(${1} block last_header | jq ".height")
+    expect=$((cur_height + ${2}))
+    local count=0
+    while true; do
+        new_height=$(${1} block last_header | jq ".height")
+        if [ "${new_height}" -ge "${expect}" ]; then
+            break
+        fi
+        count=$((count + 1))
+        sleep 0.1
+    done
+    echo "wait new block $count/10 s, cur height=$expect,old=$cur_height"
+}
+
 function init() {
     echo "=========== # start set wallet 1 ============="
     echo "=========== # save seed to wallet ============="
@@ -60,6 +79,10 @@ function init() {
 
     echo "=========== # end set wallet 1 ============="
 
+    echo "=========== # block wait 3 ============="
+    block_wait "./chain33-cli" 3
+
+    ./chain33-cli send coins transfer -a 100 -n test -t 14KEKbYtKKQm4wMthSK9J4La4nAiidGozt -k 4257D8692EF7FE13C68B65D6A52F03933DB2FA5CE8FAF210B5B8B80C721CED01
 }
 
 set -x
