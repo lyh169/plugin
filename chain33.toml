@@ -157,9 +157,9 @@ targetTimePerBlock=5
 
 [mver.consensus.ticket.ForkChainParamV1]
 futureBlockTime = 15
-ticketFrozenTime = 43200
-ticketWithdrawTime = 172800
-ticketMinerWaitTime = 7200
+ticketFrozenTime = 100
+ticketWithdrawTime = 200
+ticketMinerWaitTime = 50
 targetTimespan=10000000
 targetTimePerBlock=5
 
